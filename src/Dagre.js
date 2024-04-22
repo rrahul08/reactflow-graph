@@ -96,7 +96,7 @@
 
 // export default DagreLayout
 import Dagre from '@dagrejs/dagre';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState , useRef } from 'react';
 import ReactFlow, {
   Panel,
   useNodesState,
@@ -106,10 +106,14 @@ import ReactFlow, {
   Controls,
   Background
 } from 'reactflow';
-
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import CustomNode from './CustomNode.js';
-import { initialNodes, initialEdges } from './Data.js';
+// import { initialNodes, initialEdges } from './Data.js';
 import 'reactflow/dist/style.css';
+import { initialNodesISIS , initialEdgesISIS } from './Isis.js';
+
+
 
 const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
@@ -138,11 +142,12 @@ const nodeTypes = { customnode: CustomNode };
 
 const DagreLayout = () => {
   const { fitView } = useReactFlow();
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesISIS);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdgesISIS);
   const [selectedLabel, setSelectedLabel] = useState('');
+  const reactFlowWrapper = useRef(null);
 
-  const uniqueLabels = [...new Set(initialNodes.map(node => node.data.label))];
+  const uniqueLabels = [...new Set(initialNodesISIS.map(node => node.data.label))];
 
   const handleChangeLabel = (e) => {
     setSelectedLabel(e.target.value);
@@ -166,9 +171,11 @@ const DagreLayout = () => {
     onLayout('TB');
   }, [1]);
 
+
+  
   // Filter nodes and edges based on the selected label
-  const filteredNodes = selectedLabel ? initialNodes.filter(node => node.data.label === selectedLabel) : initialNodes;
-  const filteredEdges = initialEdges.filter(edge =>
+  const filteredNodes = selectedLabel ? initialNodesISIS.filter(node => node.data.label === selectedLabel) : initialNodesISIS;
+  const filteredEdges = initialEdgesISIS.filter(edge =>
     filteredNodes.some(node => node.id === edge.source) &&
     filteredNodes.some(node => node.id === edge.target)
   );
@@ -185,6 +192,22 @@ const DagreLayout = () => {
     fitView();
   }, [nodes, edges, fitView]);
 
+  const handleDownload = () => {
+    html2canvas(document.getElementById('flow'), {
+      width: 1500,
+      height: 700,
+      scale: 2,
+      scrollX: 0,
+      scrollY: 0,
+    }).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('l', 'px', [1500 * 2, 700 * 2]);
+      pdf.addImage(imgData, 'PNG', 0, 0, 1500 * 2, 700 * 2);
+      pdf.save('graph.pdf');
+    });
+  };
+
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <div style={{ marginBottom: '10px' }}>
@@ -194,9 +217,12 @@ const DagreLayout = () => {
             <option key={index} value={label}>{label}</option>
           ))}
         </select>
+       
       </div>
-      <div style={{ flex: '1', position: 'relative' }}>
+      <div ref={reactFlowWrapper}   id='flow' style={{ flex: '1', position: 'relative' }}>
+        
         <ReactFlow
+        
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
@@ -206,15 +232,17 @@ const DagreLayout = () => {
           minZoom={0.01}
           style={{ width: '100%', height: '100%' }}
         >
-          <Panel position="top-right">
+          <Panel position="top-right" style={{marginTop:''}}>
             <button onClick={() => onLayout('TB')}>vertical layout</button>
             <button onClick={() => onLayout('LR')}>horizontal layout</button>
+            
           </Panel>
           <Controls />
           <MiniMap />
           <Background variant="dots" gap={12} size={1} />
         </ReactFlow>
       </div>
+      {/* <button onClick={handleDownload}>Download as PDF</button>  */}
     </div>
   );
 };

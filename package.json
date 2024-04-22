@@ -9,11 +9,16 @@
     "@testing-library/user-event": "^13.5.0",
     "d3-hierarchy": "^3.1.2",
     "elkjs": "^0.9.3",
+    "file-saver": "^2.0.5",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "pdfkit": "^0.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-flow-renderer": "^10.3.17",
     "react-scripts": "5.0.1",
     "reactflow": "^11.11.1",
+    "svg-to-pdfkit": "^0.1.8",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

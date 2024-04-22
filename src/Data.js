@@ -3787,7 +3787,7 @@ export const data = JSON.parse(`[
     const y = Math.floor(Math.random() * 200); 
     initialNodes.push({
       id: node.id,
-      data: { label: node.label },
+      data: { label: node.label ,value:node.value },
       position: { x, y },
       type:'customnode'
     });
